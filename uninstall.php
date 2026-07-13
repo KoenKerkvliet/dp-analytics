@@ -18,3 +18,5 @@ delete_option( 'dpa_salt' );
 delete_option( 'dpa_db_version' );
 delete_option( 'dpa_version' );
 delete_option( 'dpa_report_last_sent' );
+delete_option( 'dpa_mainwp_buckets' );
+delete_transient( 'dpa_mainwp_payload' );

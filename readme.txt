@@ -4,7 +4,7 @@ Tags: analytics, statistics, privacy, cookieless, gdpr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 
 Privacy-vriendelijke, cookieless website-statistieken voor WordPress.
@@ -21,6 +21,9 @@ DP Analytics telt weergaven, bezoekers, sessies en verkeersbronnen — zonder co
 * **Licht**: drie compacte databasetabellen, geen externe diensten.
 
 == Changelog ==
+
+= 1.3.0 =
+* Nieuw: MainWP-koppeling. Op sites die via een MainWP-dashboard beheerd worden (MainWP Child actief), stuurt DP Analytics bij elke sync automatisch een compact statistiekblok mee (de laatste 12 maanden aan bezoekers, weergaven, sessies, verkeersbronnen en — op webshops — omzet). Een MainWP-dashboard kan die cijfers zo in het maandelijkse klantrapport tonen, zonder aparte API-key of losse verbinding. Er stromen alleen geaggregeerde, cookieloze cijfers over; geen bezoekersdata.
 
 = 1.2.0 =
 * Nieuw: periodiek e-mailrapport. Laat DP Analytics maandelijks of wekelijks automatisch een overzichtelijke HTML-mail sturen met de belangrijkste cijfers (bezoekers, weergaven, sessies, bouncepercentage, populairste pagina's, verkeersbronnen, en op webshops de omzet en conversie) — inclusief de verandering ten opzichte van de vorige periode. Ideaal om klanten periodiek te laten zien wat hun website oplevert. Meerdere ontvangers instelbaar, met een knop om direct een testrapport te sturen. Verzending via de mailconfiguratie van de site (wp_mail).

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: DP Analytics
  * Description: Privacy-vriendelijke, cookieless website-statistieken voor WordPress. Telt weergaven, bezoekers, sessies en verkeersbronnen zonder cookies en zonder persoonsgegevens op te slaan — dus geen cookiebanner-toestemming nodig. Cache-safe via een lichte JavaScript-beacon.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Design Pixels
  * Author URI: https://designpixels.nl
  * Text Domain: dp-analytics
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'DPA_VERSION', '1.2.0' );
+define( 'DPA_VERSION', '1.3.0' );
 define( 'DPA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DPA_URL', plugin_dir_url( __FILE__ ) );
 
@@ -24,6 +24,7 @@ require_once DPA_PATH . 'includes/class-dpa-tracker.php';
 require_once DPA_PATH . 'includes/class-dpa-stats.php';
 require_once DPA_PATH . 'includes/class-dpa-woo.php';
 require_once DPA_PATH . 'includes/class-dpa-report.php';
+require_once DPA_PATH . 'includes/class-dpa-mainwp.php';
 require_once DPA_PATH . 'includes/class-dpa-admin.php';
 
 /**
@@ -54,6 +55,7 @@ register_deactivation_hook( __FILE__, function () {
 add_action( 'plugins_loaded', function () {
     DPA_Tracker::instance()->init();
     DPA_Report::instance()->init();
+    DPA_Mainwp::instance()->init();
 
     if ( is_admin() ) {
         DPA_Admin::instance()->init();
