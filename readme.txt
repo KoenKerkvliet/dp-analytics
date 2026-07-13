@@ -4,7 +4,7 @@ Tags: analytics, statistics, privacy, cookieless, gdpr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 
 Privacy-vriendelijke, cookieless website-statistieken voor WordPress.
@@ -21,6 +21,9 @@ DP Analytics telt weergaven, bezoekers, sessies en verkeersbronnen — zonder co
 * **Licht**: drie compacte databasetabellen, geen externe diensten.
 
 == Changelog ==
+
+= 1.4.0 =
+* Nieuw: importeer historische data uit Independent Analytics. Stap je over van Independent Analytics, dan kun je met één knop (Instellingen → Historische data importeren) de oude weergaven en sessies overnemen, zodat je die historie niet verliest. Alleen data van vóór de eerste eigen meting wordt overgenomen (geen dubbeltellingen); WooCommerce-omzet hoeft niet, die leest DP Analytics live uit WooCommerce.
 
 = 1.3.1 =
 * Fix: de MainWP-koppeling gebruikte de verkeerde sync-hook (mainwp_child_sync_others_data i.p.v. mainwp_site_sync_others_data), waardoor het statistiekblok niet werd meegestuurd. Nu correct.

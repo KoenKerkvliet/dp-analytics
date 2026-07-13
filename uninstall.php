@@ -20,3 +20,4 @@ delete_option( 'dpa_version' );
 delete_option( 'dpa_report_last_sent' );
 delete_option( 'dpa_mainwp_buckets' );
 delete_transient( 'dpa_mainwp_payload' );
+delete_option( 'dpa_ia_import' );

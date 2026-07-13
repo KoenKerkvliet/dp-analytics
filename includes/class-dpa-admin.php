@@ -24,6 +24,7 @@ class DPA_Admin {
         add_action( 'admin_enqueue_scripts', [ $this, 'assets' ] );
         add_action( 'admin_post_dpa_save_settings', [ $this, 'save_settings' ] );
         add_action( 'admin_post_dpa_send_test_report', [ $this, 'send_test_report' ] );
+        add_action( 'admin_post_dpa_import_ia', [ $this, 'import_ia' ] );
 
         // Weergaven-kolom in de lijst van pagina's/berichten.
         foreach ( [ 'page', 'post' ] as $type ) {
@@ -386,11 +387,40 @@ class DPA_Admin {
         exit;
     }
 
+    /**
+     * Eenmalige import van historische data uit Independent Analytics.
+     */
+    public function import_ia() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( 'Geen toegang.' );
+        }
+        check_admin_referer( 'dpa_import_ia' );
+
+        $res  = DPA_Import_IA::run();
+        $args = [ 'page' => 'dp-analytics', 'tab' => 'settings' ];
+        if ( is_wp_error( $res ) ) {
+            $args['dpa_import'] = 'error';
+        } else {
+            $args['dpa_import'] = 'ok';
+            $args['dpa_import_v'] = (int) $res['views'];
+        }
+
+        wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+        exit;
+    }
+
     private function render_settings() {
         $s = DPA_Settings::get();
         ?>
         <?php if ( isset( $_GET['dpa_saved'] ) ) : ?>
             <div class="notice notice-success is-dismissible"><p>Instellingen opgeslagen.</p></div>
+        <?php endif; ?>
+        <?php if ( isset( $_GET['dpa_import'] ) ) : ?>
+            <?php if ( 'ok' === $_GET['dpa_import'] ) : ?>
+                <div class="notice notice-success is-dismissible"><p>Import uit Independent Analytics afgerond: <?php echo esc_html( number_format_i18n( (int) ( $_GET['dpa_import_v'] ?? 0 ) ) ); ?> historische weergaven overgenomen.</p></div>
+            <?php else : ?>
+                <div class="notice notice-error is-dismissible"><p>De import kon niet worden uitgevoerd (al gedaan, of Independent Analytics niet gevonden).</p></div>
+            <?php endif; ?>
         <?php endif; ?>
         <?php if ( isset( $_GET['dpa_test'] ) ) : ?>
             <?php if ( $_GET['dpa_test'] ) : ?>
@@ -456,6 +486,25 @@ class DPA_Admin {
             <input type="hidden" name="action" value="dpa_send_test_report">
             <?php submit_button( 'Verstuur testrapport nu', 'secondary', 'submit', false ); ?>
         </form>
+
+        <?php if ( DPA_Import_IA::available() ) : ?>
+            <hr>
+            <h2>Historische data importeren</h2>
+            <?php if ( DPA_Import_IA::already_done() ) : $r = DPA_Import_IA::result(); ?>
+                <p>De historische data uit Independent Analytics is geïmporteerd<?php echo ! empty( $r['time'] ) ? ' op ' . esc_html( wp_date( 'j F Y H:i', $r['time'] ) ) : ''; ?>: <strong><?php echo esc_html( number_format_i18n( $r['views'] ?? 0 ) ); ?></strong> weergaven en <strong><?php echo esc_html( number_format_i18n( $r['sessions'] ?? 0 ) ); ?></strong> sessies.</p>
+            <?php else : $pre = DPA_Import_IA::preview(); ?>
+                <p>Er is <strong>Independent Analytics</strong> op deze site gevonden. Je kunt de historische cijfers (van vóór de eerste meting van DP Analytics) eenmalig overnemen, zodat je die data niet verliest bij het overstappen.</p>
+                <?php if ( $pre ) : ?>
+                    <p>Wordt overgenomen: <strong><?php echo esc_html( number_format_i18n( $pre['views'] ) ); ?></strong> weergaven en <strong><?php echo esc_html( number_format_i18n( $pre['sessions'] ) ); ?></strong> sessies (t/m <?php echo esc_html( wp_date( 'j F Y H:i', strtotime( $pre['cutoff'] . ' UTC' ) ) ); ?>).</p>
+                <?php endif; ?>
+                <p class="description">WooCommerce-omzet wordt niet overgenomen — die leest DP Analytics sowieso live uit WooCommerce, dus je historische omzet is er al. De import telt geen dubbele data: alleen cijfers van vóór de eigen metingen komen mee.</p>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('Historische data uit Independent Analytics importeren? Dit kan even duren en kan maar één keer.');">
+                    <?php wp_nonce_field( 'dpa_import_ia' ); ?>
+                    <input type="hidden" name="action" value="dpa_import_ia">
+                    <?php submit_button( 'Importeer uit Independent Analytics', 'secondary', 'submit', false ); ?>
+                </form>
+            <?php endif; ?>
+        <?php endif; ?>
 
         <hr>
         <h2>Privacy</h2>
