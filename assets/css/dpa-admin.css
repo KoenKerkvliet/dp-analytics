@@ -68,6 +68,13 @@
     .dpa-columns { grid-template-columns: 1fr; }
 }
 
+.dpa-section-title {
+    margin: 26px 0 12px;
+    padding-top: 18px;
+    border-top: 1px solid #dcdcde;
+    font-size: 1.15em;
+}
+
 .dpa-num { text-align: right; white-space: nowrap; }
 
 .dpa-empty { color: #787c82; font-style: italic; }

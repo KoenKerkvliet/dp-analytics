@@ -148,6 +148,8 @@ class DPA_Admin {
         $pages    = DPA_Stats::top_pages( $p['from'], $p['to'], 15 );
         $refs     = DPA_Stats::top_referrers( $p['from'], $p['to'], 12 );
         $types    = DPA_Stats::referrer_types( $p['from'], $p['to'] );
+
+        $woo      = DPA_Woo::active() ? DPA_Woo::report( strtotime( $p['from'] . ' UTC' ), strtotime( $p['to'] . ' UTC' ) ) : null;
         ?>
         <div class="dpa-periods">
             <?php foreach ( $this->periods() as $key => $label ) : ?>
@@ -212,14 +214,51 @@ class DPA_Admin {
             </div>
         </div>
 
-        <p class="description" style="margin-top:16px;">Cookieless &amp; privacyvriendelijk: er worden geen cookies geplaatst en geen IP-adressen of persoonsgegevens opgeslagen. Bezoekers worden geteld via een per-dag roterende, onomkeerbare hash. Daarom is voor deze statistieken geen cookie-toestemming nodig.</p>
+        <?php if ( null !== $woo ) : ?>
+            <?php
+            $conv = $totals['sessions'] > 0 ? round( $woo['orders'] / $totals['sessions'] * 100, 1 ) : 0.0;
+            ?>
+            <h2 class="dpa-section-title">WooCommerce</h2>
+            <div class="dpa-kpis">
+                <?php
+                $this->kpi( 'Omzet', DPA_Woo::price( $woo['revenue'] ), 'betaalde bestellingen', true );
+                $this->kpi( 'Bestellingen', (int) $woo['orders'] );
+                $this->kpi( 'Gem. orderwaarde', DPA_Woo::price( $woo['aov'] ), '', true );
+                $this->kpi( 'Conversieratio', $conv . '%', 'bestellingen ÷ sessies' );
+                ?>
+            </div>
+
+            <div class="dpa-card">
+                <h2>Best verkochte producten</h2>
+                <?php if ( ! empty( $woo['top_products'] ) ) : ?>
+                    <table class="widefat striped">
+                        <thead><tr><th>Product</th><th class="dpa-num">Aantal</th><th class="dpa-num">Omzet</th></tr></thead>
+                        <tbody>
+                        <?php foreach ( $woo['top_products'] as $pid => $prod ) :
+                            $edit = get_edit_post_link( $pid );
+                            ?>
+                            <tr>
+                                <td><?php echo $edit ? '<a href="' . esc_url( $edit ) . '">' . esc_html( $prod['name'] ) . '</a>' : esc_html( $prod['name'] ); ?></td>
+                                <td class="dpa-num"><?php echo esc_html( number_format_i18n( $prod['qty'] ) ); ?></td>
+                                <td class="dpa-num"><?php echo wp_kses_post( DPA_Woo::price( $prod['revenue'] ) ); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else : ?>
+                    <p class="dpa-empty">Geen betaalde bestellingen in deze periode.</p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <p class="description" style="margin-top:16px;">Cookieless &amp; privacyvriendelijk: er worden geen cookies geplaatst en geen IP-adressen of persoonsgegevens opgeslagen. Bezoekers worden geteld via een per-dag roterende, onomkeerbare hash. Daarom is voor deze statistieken geen cookie-toestemming nodig.<?php echo null !== $woo ? ' De omzetcijfers komen rechtstreeks uit WooCommerce (statussen "verwerkt" en "voltooid"); de conversieratio is het aantal bestellingen gedeeld door het aantal sessies in de periode.' : ''; ?></p>
         <?php
     }
 
-    private function kpi( $label, $value, $sub = '' ) {
+    private function kpi( $label, $value, $sub = '', $raw = false ) {
         ?>
         <div class="dpa-kpi">
-            <span class="dpa-kpi-value"><?php echo esc_html( is_int( $value ) ? number_format_i18n( $value ) : $value ); ?></span>
+            <span class="dpa-kpi-value"><?php echo $raw ? wp_kses_post( $value ) : esc_html( is_int( $value ) ? number_format_i18n( $value ) : $value ); ?></span>
             <span class="dpa-kpi-label"><?php echo esc_html( $label ); ?></span>
             <?php if ( $sub ) : ?><span class="dpa-kpi-sub"><?php echo esc_html( $sub ); ?></span><?php endif; ?>
         </div>
@@ -397,11 +436,15 @@ class DPA_Admin {
         $p      = $this->resolve_period( '7days' );
         $totals = DPA_Stats::totals( $p['from'], $p['to'] );
         $pages  = DPA_Stats::top_pages( $p['from'], $p['to'], 5 );
+        $woo    = DPA_Woo::active() ? DPA_Woo::report( strtotime( $p['from'] . ' UTC' ), strtotime( $p['to'] . ' UTC' ) ) : null;
         ?>
-        <div class="dpa-widget-kpis" style="display:flex;gap:16px;margin-bottom:12px;">
+        <div class="dpa-widget-kpis" style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
             <div><strong style="font-size:1.4em;"><?php echo esc_html( number_format_i18n( $totals['views'] ) ); ?></strong><br>Weergaven</div>
             <div><strong style="font-size:1.4em;"><?php echo esc_html( number_format_i18n( $totals['visitors'] ) ); ?></strong><br>Bezoekers</div>
             <div><strong style="font-size:1.4em;"><?php echo esc_html( number_format_i18n( $totals['sessions'] ) ); ?></strong><br>Sessies</div>
+            <?php if ( null !== $woo ) : ?>
+                <div><strong style="font-size:1.4em;"><?php echo wp_kses_post( DPA_Woo::price( $woo['revenue'] ) ); ?></strong><br>Omzet</div>
+            <?php endif; ?>
         </div>
         <?php if ( $pages ) : ?>
             <ol style="margin:0 0 8px 18px;">
