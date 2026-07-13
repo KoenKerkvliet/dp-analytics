@@ -28,14 +28,16 @@ class DPA_Mainwp {
     }
 
     public function init() {
-        // De filter vuurt alleen als MainWP Child actief is en synct.
-        add_filter( 'mainwp_child_sync_others_data', [ $this, 'attach' ], 10, 2 );
+        // Vuurt tijdens de MainWP Child-sync (stats-opbouw). $information is het
+        // sync-antwoord dat naar het dashboard teruggaat; $others is de
+        // (optionele) request-data van het dashboard.
+        add_filter( 'mainwp_site_sync_others_data', [ $this, 'attach' ], 10, 2 );
     }
 
     /**
-     * Hang het statistiekblok aan de sync-data van MainWP Child.
+     * Hang het statistiekblok aan het MainWP-sync-antwoord.
      */
-    public function attach( $information, $data = [] ) {
+    public function attach( $information, $others = [] ) {
         if ( is_array( $information ) ) {
             $information['dpa'] = $this->payload();
         }

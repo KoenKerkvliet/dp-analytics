@@ -4,7 +4,7 @@ Tags: analytics, statistics, privacy, cookieless, gdpr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 
 Privacy-vriendelijke, cookieless website-statistieken voor WordPress.
@@ -21,6 +21,9 @@ DP Analytics telt weergaven, bezoekers, sessies en verkeersbronnen — zonder co
 * **Licht**: drie compacte databasetabellen, geen externe diensten.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: de MainWP-koppeling gebruikte de verkeerde sync-hook (mainwp_child_sync_others_data i.p.v. mainwp_site_sync_others_data), waardoor het statistiekblok niet werd meegestuurd. Nu correct.
 
 = 1.3.0 =
 * Nieuw: MainWP-koppeling. Op sites die via een MainWP-dashboard beheerd worden (MainWP Child actief), stuurt DP Analytics bij elke sync automatisch een compact statistiekblok mee (de laatste 12 maanden aan bezoekers, weergaven, sessies, verkeersbronnen en — op webshops — omzet). Een MainWP-dashboard kan die cijfers zo in het maandelijkse klantrapport tonen, zonder aparte API-key of losse verbinding. Er stromen alleen geaggregeerde, cookieloze cijfers over; geen bezoekersdata.
