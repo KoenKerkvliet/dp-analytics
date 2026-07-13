@@ -4,7 +4,7 @@ Tags: analytics, statistics, privacy, cookieless, gdpr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 
 Privacy-vriendelijke, cookieless website-statistieken voor WordPress.
@@ -21,6 +21,9 @@ DP Analytics telt weergaven, bezoekers, sessies en verkeersbronnen — zonder co
 * **Licht**: drie compacte databasetabellen, geen externe diensten.
 
 == Changelog ==
+
+= 1.2.0 =
+* Nieuw: periodiek e-mailrapport. Laat DP Analytics maandelijks of wekelijks automatisch een overzichtelijke HTML-mail sturen met de belangrijkste cijfers (bezoekers, weergaven, sessies, bouncepercentage, populairste pagina's, verkeersbronnen, en op webshops de omzet en conversie) — inclusief de verandering ten opzichte van de vorige periode. Ideaal om klanten periodiek te laten zien wat hun website oplevert. Meerdere ontvangers instelbaar, met een knop om direct een testrapport te sturen. Verzending via de mailconfiguratie van de site (wp_mail).
 
 = 1.1.0 =
 * Nieuw: WooCommerce-integratie. Op sites met WooCommerce toont het dashboard nu ook omzet, aantal bestellingen, gemiddelde orderwaarde, conversieratio (bestellingen ÷ sessies) en de best verkochte producten voor de gekozen periode. De omzetcijfers komen rechtstreeks uit WooCommerce (statussen "verwerkt" en "voltooid", aanpasbaar via de filter dpa_woo_paid_statuses); er wordt niets extra's getrackt. De omzet verschijnt ook op de dashboard-widget.

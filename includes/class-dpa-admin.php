@@ -23,6 +23,7 @@ class DPA_Admin {
         add_action( 'admin_menu', [ $this, 'menu' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'assets' ] );
         add_action( 'admin_post_dpa_save_settings', [ $this, 'save_settings' ] );
+        add_action( 'admin_post_dpa_send_test_report', [ $this, 'send_test_report' ] );
 
         // Weergaven-kolom in de lijst van pagina's/berichten.
         foreach ( [ 'page', 'post' ] as $type ) {
@@ -353,10 +354,33 @@ class DPA_Admin {
             'exclude_editors'  => empty( $post['exclude_editors'] ) ? 0 : 1,
             'retention_days'   => max( 0, min( 3650, (int) ( $post['retention_days'] ?? 730 ) ) ),
             'dashboard_widget' => empty( $post['dashboard_widget'] ) ? 0 : 1,
+            'email_reports'    => empty( $post['email_reports'] ) ? 0 : 1,
+            'email_frequency'  => in_array( $post['email_frequency'] ?? '', [ 'monthly', 'weekly' ], true ) ? $post['email_frequency'] : 'monthly',
+            'email_recipients' => sanitize_text_field( $post['email_recipients'] ?? '' ),
         ] );
 
         wp_safe_redirect( add_query_arg(
             [ 'page' => 'dp-analytics', 'tab' => 'settings', 'dpa_saved' => 1 ],
+            admin_url( 'admin.php' )
+        ) );
+        exit;
+    }
+
+    /**
+     * Verstuur nu een rapport over de laatst afgesloten periode (test-knop).
+     */
+    public function send_test_report() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( 'Geen toegang.' );
+        }
+        check_admin_referer( 'dpa_send_test_report' );
+
+        $freq   = 'weekly' === DPA_Settings::val( 'email_frequency' ) ? 'weekly' : 'monthly';
+        $period = DPA_Report::instance()->period( $freq );
+        $ok     = DPA_Report::instance()->send( $period );
+
+        wp_safe_redirect( add_query_arg(
+            [ 'page' => 'dp-analytics', 'tab' => 'settings', 'dpa_test' => $ok ? 1 : 0 ],
             admin_url( 'admin.php' )
         ) );
         exit;
@@ -367,6 +391,13 @@ class DPA_Admin {
         ?>
         <?php if ( isset( $_GET['dpa_saved'] ) ) : ?>
             <div class="notice notice-success is-dismissible"><p>Instellingen opgeslagen.</p></div>
+        <?php endif; ?>
+        <?php if ( isset( $_GET['dpa_test'] ) ) : ?>
+            <?php if ( $_GET['dpa_test'] ) : ?>
+                <div class="notice notice-success is-dismissible"><p>Testrapport verstuurd naar: <?php echo esc_html( implode( ', ', DPA_Settings::report_recipients() ) ); ?>.</p></div>
+            <?php else : ?>
+                <div class="notice notice-error is-dismissible"><p>Het testrapport kon niet worden verstuurd. Controleer de mailconfiguratie van de site.</p></div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -395,8 +426,35 @@ class DPA_Admin {
                     <th scope="row">Dashboard-widget</th>
                     <td><label><input type="checkbox" name="dashboard_widget" value="1" <?php checked( $s['dashboard_widget'] ); ?>> Overzicht tonen op het WordPress-dashboard</label></td>
                 </tr>
+                <tr>
+                    <th scope="row">E-mailrapport</th>
+                    <td>
+                        <label><input type="checkbox" name="email_reports" value="1" <?php checked( $s['email_reports'] ); ?>> Periodiek een overzichtsrapport mailen</label>
+                        <p style="margin-top:10px;">
+                            <label for="dpa-email-freq">Frequentie</label>
+                            <select id="dpa-email-freq" name="email_frequency">
+                                <option value="monthly" <?php selected( $s['email_frequency'], 'monthly' ); ?>>Maandelijks</option>
+                                <option value="weekly" <?php selected( $s['email_frequency'], 'weekly' ); ?>>Wekelijks</option>
+                            </select>
+                        </p>
+                        <p style="margin-top:8px;">
+                            <label for="dpa-email-to" style="display:block;margin-bottom:3px;">Ontvangers</label>
+                            <input type="text" id="dpa-email-to" class="regular-text" name="email_recipients" value="<?php echo esc_attr( $s['email_recipients'] ); ?>" placeholder="klant@voorbeeld.nl, jij@designpixels.nl">
+                        </p>
+                        <p class="description">Komma-gescheiden e-mailadressen. Leeg = het beheerdersadres (<?php echo esc_html( get_option( 'admin_email' ) ); ?>). Ideaal om je klant maandelijks te laten zien wat zijn website oplevert. Het rapport bevat de bezoekers, weergaven, sessies en verkeersbronnen (en op webshops de omzet), met vergelijking t.o.v. de vorige periode.</p>
+                    </td>
+                </tr>
             </table>
             <?php submit_button( 'Instellingen opslaan' ); ?>
+        </form>
+
+        <hr>
+        <h2>Rapport testen</h2>
+        <p>Verstuur nu direct een rapport over de laatst afgesloten <?php echo 'weekly' === $s['email_frequency'] ? 'week' : 'maand'; ?> naar de ingestelde ontvangers, om te zien hoe het eruitziet.</p>
+        <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+            <?php wp_nonce_field( 'dpa_send_test_report' ); ?>
+            <input type="hidden" name="action" value="dpa_send_test_report">
+            <?php submit_button( 'Verstuur testrapport nu', 'secondary', 'submit', false ); ?>
         </form>
 
         <hr>

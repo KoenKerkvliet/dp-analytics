@@ -2,7 +2,7 @@
 /**
  * Plugin Name: DP Analytics
  * Description: Privacy-vriendelijke, cookieless website-statistieken voor WordPress. Telt weergaven, bezoekers, sessies en verkeersbronnen zonder cookies en zonder persoonsgegevens op te slaan — dus geen cookiebanner-toestemming nodig. Cache-safe via een lichte JavaScript-beacon.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Design Pixels
  * Author URI: https://designpixels.nl
  * Text Domain: dp-analytics
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'DPA_VERSION', '1.1.0' );
+define( 'DPA_VERSION', '1.2.0' );
 define( 'DPA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DPA_URL', plugin_dir_url( __FILE__ ) );
 
@@ -23,6 +23,7 @@ require_once DPA_PATH . 'includes/class-dpa-settings.php';
 require_once DPA_PATH . 'includes/class-dpa-tracker.php';
 require_once DPA_PATH . 'includes/class-dpa-stats.php';
 require_once DPA_PATH . 'includes/class-dpa-woo.php';
+require_once DPA_PATH . 'includes/class-dpa-report.php';
 require_once DPA_PATH . 'includes/class-dpa-admin.php';
 
 /**
@@ -40,14 +41,19 @@ register_activation_hook( __FILE__, function () {
     if ( ! wp_next_scheduled( 'dpa_prune' ) ) {
         wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dpa_prune' );
     }
+    if ( ! wp_next_scheduled( 'dpa_report_tick' ) ) {
+        wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dpa_report_tick' );
+    }
 } );
 
 register_deactivation_hook( __FILE__, function () {
     wp_clear_scheduled_hook( 'dpa_prune' );
+    wp_clear_scheduled_hook( 'dpa_report_tick' );
 } );
 
 add_action( 'plugins_loaded', function () {
     DPA_Tracker::instance()->init();
+    DPA_Report::instance()->init();
 
     if ( is_admin() ) {
         DPA_Admin::instance()->init();
@@ -66,6 +72,9 @@ add_action( 'admin_init', function () {
     DPA_Install::install();
     if ( ! wp_next_scheduled( 'dpa_prune' ) ) {
         wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dpa_prune' );
+    }
+    if ( ! wp_next_scheduled( 'dpa_report_tick' ) ) {
+        wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dpa_report_tick' );
     }
     update_option( 'dpa_version', DPA_VERSION, false );
 } );
