@@ -1,0 +1,97 @@
+/* DP Analytics — dashboard */
+
+.dpa-periods {
+    margin: 16px 0;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.dpa-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+@media (max-width: 782px) {
+    .dpa-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dpa-kpi {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dpa-kpi-value {
+    font-size: 1.9em;
+    font-weight: 600;
+    line-height: 1.1;
+    color: #1d2327;
+}
+
+.dpa-kpi-label {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.dpa-kpi-sub {
+    font-size: 0.85em;
+    color: #787c82;
+}
+
+.dpa-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+}
+
+.dpa-card h2 {
+    margin-top: 0;
+    font-size: 1.05em;
+}
+
+.dpa-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+@media (max-width: 1100px) {
+    .dpa-columns { grid-template-columns: 1fr; }
+}
+
+.dpa-num { text-align: right; white-space: nowrap; }
+
+.dpa-empty { color: #787c82; font-style: italic; }
+
+/* Grafiek */
+.dpa-chart svg { width: 100%; height: 220px; display: block; }
+.dpa-chart-bar { fill: #2271b1; transition: fill .15s ease; }
+.dpa-chart-bar:hover { fill: #135e96; }
+.dpa-chart-label { fill: #787c82; font-size: 11px; }
+
+/* Bron-type balken */
+.dpa-bars { display: flex; flex-direction: column; gap: 8px; }
+.dpa-bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.9em; }
+.dpa-bar-label { flex: 0 0 92px; }
+.dpa-bar-track { flex: 1 1 auto; background: #f0f0f1; border-radius: 5px; height: 12px; overflow: hidden; }
+.dpa-bar-fill { display: block; height: 100%; border-radius: 5px; background: #2271b1; }
+.dpa-bar-num { flex: 0 0 auto; color: #50575e; min-width: 40px; text-align: right; }
+
+.dpa-bar-direct   { background: #787c82; }
+.dpa-bar-search   { background: #2271b1; }
+.dpa-bar-social   { background: #8c5ad6; }
+.dpa-bar-referral { background: #00a32a; }
+
+@media (prefers-color-scheme: dark) {
+    .dpa-kpi, .dpa-card { background: #1e1e1e; border-color: #3c3c3c; }
+    .dpa-kpi-value, .dpa-kpi-label { color: #e0e0e0; }
+}
